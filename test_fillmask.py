@@ -8,8 +8,8 @@ from paddlenlp.transformers import BertModel, BertTokenizer,BertForMaskedLM
 class TestMask(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName)
-        self.model = BertForMaskedLM.from_pretrained('bert-wwm-chinese')
-        self.tokenizer = BertTokenizer.from_pretrained('bert-wwm-chinese')
+        self.model = BertForMaskedLM.from_pretrained('bert-base-chinese')
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
         self.mask_token_id = 103
     def test_fill(self):
         test_str = '巴黎是[MASK]国的首都.'
