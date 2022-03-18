@@ -10,8 +10,8 @@ from transformers import BertTokenizer, BertForMaskedLM
 class TestMask(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName)
-        self.pdbert = paddlenlp.transformers.BertForMaskedLM.from_pretrained('bert-wwm-chinese')
-        self.pdtokenizer = paddlenlp.transformers.BertTokenizer.from_pretrained('bert-wwm-chinese')
+        self.pdbert = paddlenlp.transformers.BertForMaskedLM.from_pretrained('bert-base-chinese')
+        self.pdtokenizer = paddlenlp.transformers.BertTokenizer.from_pretrained('bert-base-chinese')
         self.hftokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
         self.hfbert = BertForMaskedLM.from_pretrained('bert-base-chinese')
 
@@ -22,9 +22,11 @@ class TestMask(unittest.TestCase):
         print(pdinput)
         print(hfinput)
         pdoutput = self.pdbert(**pdinput)
-        hfoutput = self.hfbert(**hfinput)
+        hfoutput = self.hfbert(**hfinput).logits
         print(pdoutput)
         print(hfoutput)
+        print(paddle.argmax(pdoutput,axis=-1))
+        print(torch.argmax(hfoutput,dim=-1))
 
         
 def paddle_input(tokenizer_output:dict):
