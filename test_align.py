@@ -14,7 +14,6 @@ class TestMask(unittest.TestCase):
         self.pdtokenizer = paddlenlp.transformers.BertTokenizer.from_pretrained('bert-wwm-chinese')
         self.hftokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
         self.hfbert = BertForMaskedLM.from_pretrained('bert-base-chinese')
-        self.mask_token_id = 103
 
     def test_align(self):
         test_str = '巴黎是[MASK]国的首都.'
