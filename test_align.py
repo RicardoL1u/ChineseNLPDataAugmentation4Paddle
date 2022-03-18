@@ -20,6 +20,8 @@ class TestMask(unittest.TestCase):
         test_str = '巴黎是[MASK]国的首都.'
         pdinput = paddle_input(self.pdtokenizer(test_str))
         hfinput = hugface_input(self.hftokenizer(test_str))
+        print(pdinput)
+        print(hfinput)
         pdoutput = self.pdbert(**pdinput)
         hfoutput = self.hfbert(**hfinput)
         print(pdoutput)
