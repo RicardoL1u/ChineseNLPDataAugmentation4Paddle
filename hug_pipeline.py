@@ -6,7 +6,7 @@ model = BertForMaskedLM.from_pretrained('bert-base-chinese')
 
 inputs = tokenizer("巴黎是[MASK]国的首都.", return_tensors="pt")
 labels = tokenizer("巴黎是法国的首都.", return_tensors="pt")["input_ids"]
-
+print(inputs)
 outputs = model(**inputs, labels=labels)
 loss = outputs.loss
 logits = outputs.logits

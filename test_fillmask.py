@@ -2,6 +2,7 @@ import unittest
 import paddle
 import paddle.nn
 import numpy as np
+import torch
 from paddlenlp.transformers import BertModel, BertTokenizer,BertForMaskedLM
 # from transformers import BertForMaskedLM
 class TestMask(unittest.TestCase):
@@ -17,7 +18,8 @@ class TestMask(unittest.TestCase):
         model_inputs = {k:paddle.to_tensor([v]) for (k, v) in model_inputs.items()}
         # print(type(model_inputs),model_inputs)
         model_outputs = self.model(**model_inputs)
-
+        print(model_inputs)
+        print(model_outputs.shape)
 
 
         print("\n======================fsdfadfasdfsdfasdf======================================\n")
