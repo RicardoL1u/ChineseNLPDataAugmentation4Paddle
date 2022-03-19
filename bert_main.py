@@ -26,6 +26,7 @@ class BertAugmentor(object):
         self.beam_size = beam_size    # 每个带mask的句子最多生成 beam_size 个。
         self.bert_encoder = BertForMaskedLM.from_pretrained(pre_train_dir)
         self.tokenizer = BertTokenizer.from_pretrained(pre_train_dir)
+        self.topk = 2
         # token策略,由于是中文,使用了token分割,同时对于数字和英文使用char分割。
         # self.tokenizer = tokenization.CharTokenizer(vocab_file=self.bert_vocab_file)
         self.mask_token = "[MASK]"
@@ -81,31 +82,43 @@ class BertAugmentor(object):
         输入是一个word id list, 其中包含mask,对mask生产对应的词语。
         因为每个query的mask数量不一致,预测测试不一致,需要单独预测
         """
-        out_arr = []
-        for i, index_ in enumerate(indexes):
-            if i == 0:
-                out_arr = self.predict_single_mask(word_ids, index_)
-            else:
-                tmp_arr = out_arr.copy()
-                out_arr = []
-                for word_ids_, prob in tmp_arr:
-                    cur_arr = self.predict_single_mask(word_ids_, index_)
-                    cur_arr = [[x[0], x[1] * prob] for x in cur_arr]
-                    out_arr.extend(cur_arr)
-                # 筛选前beam size个
-                out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)[:self.beam_size]
-        print(type(out_arr))
-        for i, (each, _) in enumerate(out_arr):
-            query_ = [self.tokenizer.convert_ids_to_tokens[x] for x in each]
-            out_arr[i][0] = query_
-        return out_arr
+        outputs = self.bert_encoder(paddle.to_tensor(word_ids).unsqueeze(axis=0)).squeeze(axis=0) # (seq_len,dim)
+        outputs = outputs.numpy()
+        logits = paddle.to_tensor(outputs[indexes, :]) #(mask_num,vocb_corpus_size)
+        probs = paddle.nn.functional.softmax(logits,axis=-1)
+        values, predictions = probs.topk(self.beam_size)
+        print(len(indexes),values.shape,predictions.shape)
+        return self.gen_seq(word_ids,indexes,values,predictions)
+        
+    
+    def gen_seq(self,word_ids:list, indexes:list,values,predictions:paddle.Tensor):
+        result = []
+        ptr = [0] * len(indexes)
+        while len(result) < self.topk:
+            seq = np.array(word_ids).copy()
+            min_value = 1
+            pop_ptr = 0
+            v = []
+            p = []
+            for i,index in enumerate(indexes):
+                seq[index] = predictions[i,ptr[i]].item()
+                v.append(values[i,ptr[i]].item())
+                p.append(predictions[i,ptr[i]].item())
+                if values[i,ptr[i]].item() < min_value:
+                    min_value = values[i,ptr[i]].item()
+                    pop_ptr = i
+            seq = seq[np.where(seq != self.tokenizer.pad_token_id)]
+            sequence = self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(seq,skip_special_tokens=True))
+            proposition = {"score": v, "insert_index":indexes,"token": p, "token_str": self.tokenizer.convert_ids_to_tokens(p), "sequence": sequence}
+            result.append(proposition)
+            ptr[pop_ptr] += 1
+        return result
 
     def word_insert(self, query):
         """随机将某些词语mask,使用bert来生成 mask 的内容。
-        
         max_query: 所有query最多生成的个数。
         """
-        out_arr = []
+        result = []
         seg_list = jieba.cut(query, cut_all=False)
         # 随机选择非停用词mask。
         i, index_arr = 1, [1]
@@ -126,20 +139,20 @@ class BertAugmentor(object):
                 word_index.append(index_ + i)
             word_ids_arr.append(word_ids_)
             word_index_arr.append(word_index)
-        print(word_ids_arr)
-        print(word_index_arr)
+        # print(word_ids_arr)
+        # print(word_index_arr)
         for word_ids, word_index in zip(word_ids_arr, word_index_arr):
-            arr_ = self.gen_sen(word_ids, indexes=word_index)
-            out_arr.extend(arr_)
-            pass
-        # 这个是所有生成的句子中,筛选出前 beam size 个。
-        out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)
-        out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_size]]
-        return out_arr
+            result.append(self.gen_sen(word_ids, indexes=word_index))
+        #     out_arr.extend(arr_)
+        #     pass
+        # # 这个是所有生成的句子中,筛选出前 beam size 个。
+        # out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)
+        # out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_size]]
+        return result
 
     def insert_word2queries(self, queries:list, beam_size=10):
         self.beam_size = beam_size
-        out_map = defaultdict(list)
+        out_map = defaultdict(dict)
         for query in queries:
             out_map[query] = self.word_insert(query)
         return out_map

@@ -40,16 +40,16 @@ class Augmentor(object):
         insert_result = self.mask_model.insert_word2queries(queries, beam_size=20)
         print("Augmentor's result:", insert_result)
         # 写出到文件
-        with open(file_ + ".augment.bert_insert", 'w', encoding='utf-8') as out:
+        with open(file_ + ".bert_insert", 'w', encoding='utf-8') as out:
             for query, v in insert_result.items():
-                out.write("{}\t{}\n".format(query, ';'.join(v)))
+                out.write("{}\t{}\n".format(query, ';',v))
 
 
     def augment(self, file_):
         # ead
         # eda.augment(file_)/
         # bert
-        self.bert_augment(file_)
+        print(self.bert_augment(file_))
         # back translate
         # bt.augment(file_)
         pass
