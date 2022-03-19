@@ -30,14 +30,14 @@ class Augmentor(object):
         """
         queries = util.read_file(file_)
         # 随机替换:通过随机mask掉词语，预测可能的值。
-        replace_result = self.mask_model.replace_word2queries(queries, beam_size=20)
+        replace_result = self.mask_model.replace_word2queries(queries)
         with open(file_ + ".bert_replace", 'w', encoding='utf-8') as out:
             for query, v in replace_result.items():
                 for result in v:
                     out.write("{}\t{}\n".format(query,str(result)))
 
         # 随机插入:通过随机插入mask，预测可能的词语
-        insert_result = self.mask_model.insert_word2queries(queries, beam_size=20)
+        insert_result = self.mask_model.insert_word2queries(queries)
         print("Augmentor's result:", insert_result)
         # 写出到文件
         with open(file_ + ".bert_insert", 'w', encoding='utf-8') as out:

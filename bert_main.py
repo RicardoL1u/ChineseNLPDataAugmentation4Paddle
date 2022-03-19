@@ -22,8 +22,7 @@ import paddle
 
 
 class BertAugmentor(object):
-    def __init__(self,  pre_train_dir: str, beam_size=5):
-        self.beam_size = beam_size    # 每个带mask的句子最多生成 beam_size 个。
+    def __init__(self,  pre_train_dir: str):
         self.bert_encoder = BertForMaskedLM.from_pretrained(pre_train_dir)
         self.tokenizer = BertTokenizer.from_pretrained(pre_train_dir)
         self.topk = 2
@@ -47,8 +46,7 @@ class BertAugmentor(object):
         outputs = outputs.numpy()
         logits = paddle.to_tensor(outputs[indexes, :]) #(mask_num,vocb_corpus_size)
         probs = paddle.nn.functional.softmax(logits,axis=-1)
-        values, predictions = probs.topk(self.beam_size)
-        print(len(indexes),values.shape,predictions.shape)
+        values, predictions = probs.topk(self.topk)
         return self.gen_seq(word_ids,indexes,values,predictions)
         
     
@@ -133,26 +131,14 @@ class BertAugmentor(object):
 
         return result
 
-    def insert_word2queries(self, queries:list, beam_size=10):
+    def insert_word2queries(self, queries:list):
         out_map = {}
         for query in queries:
             out_map[query] = self.word_insert(query)
         return out_map
 
-    def replace_word2queries(self, queries:list, beam_size=10):
-        self.beam_size = beam_size
-        out_map = defaultdict(list)
+    def replace_word2queries(self, queries:list):
+        out_map = {}
         for query in queries:
             out_map[query] = self.word_replace(query)
         return out_map
-
-    def predict(self, query_arr, beam_size=None):
-        """
-        query_arr: ["w1", "w2", "[MASK]", ...], shape=[word_len]
-        每个query_arr, 都会返回beam_size个
-        """
-        self.beam_size = beam_size if beam_size else self.beam_size
-        word_ids, indexes = self.tokenizer.convert_tokens_to_ids(query_arr), [x[0] for x in filter(lambda x: x[1] == self.mask_token, enumerate(query_arr))]
-        out_queries = self.gen_sen(word_ids, indexes)
-        out_queries = [["".join(x[0]), x[1]] for x in out_queries]
-        return out_queries
