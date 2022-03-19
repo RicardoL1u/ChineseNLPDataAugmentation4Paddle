@@ -8,17 +8,10 @@
 todo: 将各中增强方法在此汇合和使用，输入文件，输出为各中方法增强后的结果。
 '''
 
-# here put the import lib
 import argparse
-import re
-# from email.policy import default
 import util
 import eda_chinese as eda
 import bert_main as bert
-# import back_translate as bt
-
-
-
 
 class Augmentor(object):
     def __init__(self, model_dir:str):

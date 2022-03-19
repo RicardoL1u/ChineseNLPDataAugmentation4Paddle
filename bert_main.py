@@ -12,10 +12,8 @@
 '''
 
 from paddlenlp.transformers import BertTokenizer,BertForMaskedLM
-from collections import defaultdict
 import jieba
 import numpy as np
-import heapq
 import paddle.nn
 import paddle
 # from transformers import pipelines
