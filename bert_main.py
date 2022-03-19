@@ -36,46 +36,7 @@ class BertAugmentor(object):
         self.sep_token = "[SEP]"
         self.sep_id = self.tokenizer.convert_tokens_to_ids([self.sep_token])[0]
 
-    def predict_single_mask(self, word_ids:list, mask_index:int, prob:float=None):
-        """输入一个句子token id list,对其中第mask_index个的mask的可能内容,返回 self.beam_size 个候选词语,以及prob"""
-        print(word_ids)
-        logits = self.bert_encoder(paddle.to_tensor(word_ids).unsqueeze(axis=0))
-        print(logits.shape)
-        mask_probs = paddle.nn.functional.softmax(logits.squeeze(axis=0)[mask_index],axis=-1)
-        word_ids_out = []
-        for mask_prob in mask_probs:
-            mask_prob = mask_prob.tolist()
-            max_num_index_list = map(mask_prob.index, heapq.nlargest(self.beam_size, mask_prob))
-            for i in max_num_index_list:
-                if prob and mask_prob[i] < prob:
-                    continue
-                cur_word_ids = word_ids.copy()
-                cur_word_ids[mask_index] = i
-                word_ids_out.append([cur_word_ids, mask_prob[i]])
-        return word_ids_out
     
-    # def predict_batch_mask(self, query_ids:list, mask_indexes:int, prob:float=0.5):
-    #     """输入多个token id list,对其中第mask_index个的mask的可能内容,返回 self.beam_size 个候选词语,以及prob
-    #     word_ids: [word_ids1:list, ], shape=[batch, query_lenght]
-    #     mask_indexes: query要预测的mask_id, [[mask_id], ...], shape=[batch, 1, 1]
-    #     """
-    #     word_ids_out = []
-    #     word_mask = [[1] * len(x) for x in query_ids]
-    #     word_segment_ids = [[1] * len(x) for x in query_ids]
-    #     fd = {self.input_ids: query_ids, self.input_mask: word_mask, self.segment_ids: 
-    #           word_segment_ids, self.masked_lm_positions: mask_indexes}
-    #     mask_probs = self.sess.run(self.predict_prob, feed_dict=fd)
-    #     for mask_prob, word_ids_, mask_index in zip(mask_probs, query_ids, mask_indexes):
-    #         # each query of batch
-    #         cur_out = []
-    #         mask_prob = mask_prob.tolist()
-    #         max_num_index_list = map(mask_prob.index, heapq.nlargest(self.n_best, mask_prob))
-    #         for i in max_num_index_list:
-    #             cur_word_ids = word_ids_.copy()
-    #             cur_word_ids[mask_index[0]] = i
-    #             cur_out.append([cur_word_ids, mask_prob[i]])
-    #         word_ids_out.append(cur_out)
-    #     return word_ids_out
 
     def gen_sen(self, word_ids:list, indexes:list):
         """
@@ -139,6 +100,34 @@ class BertAugmentor(object):
                 word_index.append(index_ + i)
             word_ids_arr.append(word_ids_)
             word_index_arr.append(word_index)
+        for word_ids, word_index in zip(word_ids_arr, word_index_arr):
+            result.extend(self.gen_sen(word_ids, indexes=word_index))
+
+        return result
+
+    def word_replace(self,query):
+        """随机将某些词语mask，使用bert来生成 mask 的内容。"""
+        result = []
+        seg_list = jieba.cut(query, cut_all=False)
+        # 随机选择非停用词mask。
+        i, index_map = 1, {}
+        for each in seg_list:
+            index_map[i] = len(each)
+            i += len(each)
+        # query转id
+        query = '[CLS]' + query + '[SEP]'
+        word_ids = self.tokenizer(query)["input_ids"]
+        word_ids_arr, word_index_arr = [], []
+        # 依次mask词语，
+        for index_, word_len in index_map.items():
+            word_ids_ = word_ids.copy()
+            word_index = []
+            for i in range(word_len):
+                word_ids_[index_ + i] = self.mask_id
+                word_index.append(index_ + i)
+            word_ids_arr.append(word_ids_)
+            word_index_arr.append(word_index)
+
         for word_ids, word_index in zip(word_ids_arr, word_index_arr):
             result.extend(self.gen_sen(word_ids, indexes=word_index))
 

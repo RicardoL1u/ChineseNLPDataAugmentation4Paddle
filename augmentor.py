@@ -22,9 +22,7 @@ import bert_main as bert
 
 class Augmentor(object):
     def __init__(self, model_dir:str):
-        # model_dir: bert 预训练模型地址，中文bert下载链接:https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
         self.mask_model = bert.BertAugmentor(model_dir)
-        pass
     
     def bert_augment(self, file_:str):
         """ 
@@ -32,10 +30,11 @@ class Augmentor(object):
         """
         queries = util.read_file(file_)
         # 随机替换:通过随机mask掉词语，预测可能的值。
-        # replace_result = self.mask_model.replace_word2queries(queries, beam_size=20)
-        # with open(file_ + ".augment.bert_replace", 'w', encoding='utf-8') as out:
-        #     for query, v in replace_result.items():
-        #         out.write("{}\t{}\n".format(query, ';'.join(v)))
+        replace_result = self.mask_model.replace_word2queries(queries, beam_size=20)
+        with open(file_ + ".bert_replace", 'w', encoding='utf-8') as out:
+            for query, v in replace_result.items():
+                for result in v:
+                    out.write("{}\t{}\n".format(query,str(result)))
 
         # 随机插入:通过随机插入mask，预测可能的词语
         insert_result = self.mask_model.insert_word2queries(queries, beam_size=20)
@@ -43,9 +42,7 @@ class Augmentor(object):
         # 写出到文件
         with open(file_ + ".bert_insert", 'w', encoding='utf-8') as out:
             for query, v in insert_result.items():
-                print(type(v))
                 for result in v:
-                    print((result))
                     out.write("{}\t{}\n".format(query,str(result)))
 
 
@@ -53,7 +50,7 @@ class Augmentor(object):
         # ead
         # eda.augment(file_)/
         # bert
-        print(self.bert_augment(file_))
+        self.bert_augment(file_)
         # back translate
         # bt.augment(file_)
         pass
