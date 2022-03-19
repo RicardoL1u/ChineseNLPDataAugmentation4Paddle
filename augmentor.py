@@ -22,7 +22,7 @@ import bert_main as bert
 
 class Augmentor(object):
     def __init__(self, model_dir:str):
-        # self.mask_model = bert.BertAugmentor(model_dir)
+        self.mask_model = bert.BertAugmentor(model_dir)
         pass
     
     def bert_augment(self, file_:str):
@@ -51,10 +51,7 @@ class Augmentor(object):
         # ead
         eda.augment(file_)
         # bert
-        # self.bert_augment(file_)
-        # back translate
-        # bt.augment(file_)
-        pass
+        self.bert_augment(file_)
 
 
 if __name__ == "__main__":
@@ -67,7 +64,6 @@ if __name__ == "__main__":
     augmentor = Augmentor(args.bert_dir)
     # 数据增强
     augmentor.augment(args.input)
-    pass
 
 
 

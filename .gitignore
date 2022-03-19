@@ -1,6 +1,7 @@
 # origin version
 NLPDataAugmentation-master/
 *.zip
+input.*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
