@@ -10,11 +10,11 @@ todo: 将各中增强方法在此汇合和使用，输入文件，输出为各�
 
 # here put the import lib
 import argparse
-from email.policy import default
+# from email.policy import default
 import util
-import eda_chinese as eda
+# import eda_chinese as eda
 import bert_main as bert
-import back_translate as bt
+# import back_translate as bt
 
 
 
@@ -31,10 +31,11 @@ class Augmentor(object):
         """
         queries = util.read_file(file_)
         # 随机替换:通过随机mask掉词语，预测可能的值。
-        replace_result = self.mask_model.replace_word2queries(queries, beam_size=20)
-        with open(file_ + ".augment.bert_replace", 'w', encoding='utf-8') as out:
-            for query, v in replace_result.items():
-                out.write("{}\t{}\n".format(query, ';'.join(v)))
+        # replace_result = self.mask_model.replace_word2queries(queries, beam_size=20)
+        # with open(file_ + ".augment.bert_replace", 'w', encoding='utf-8') as out:
+        #     for query, v in replace_result.items():
+        #         out.write("{}\t{}\n".format(query, ';'.join(v)))
+
         # 随机插入:通过随机插入mask，预测可能的词语
         insert_result = self.mask_model.insert_word2queries(queries, beam_size=20)
         print("Augmentor's result:", insert_result)
@@ -57,7 +58,7 @@ class Augmentor(object):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", default="./data/input", type=str, help="input file of unaugmented data")
-    ap.add_argument("--bert_dir", default="bert-wwm-chinese", type=str, help="input file of unaugmented data")
+    ap.add_argument("--bert_dir", default="bert-base-chinese", type=str, help="input file of unaugmented data")
     ap.add_argument("--num_aug", required=False, type=int, help="number of augmented sentences per original sentence")
     ap.add_argument("--alpha", required=False, type=float, help="percent of words in each sentence to be changed")
     args = ap.parse_args()
