@@ -31,10 +31,9 @@ TBD
 ## how to use
 
 1. environment require
-
-   - synonyms
    - PaddleNLP
    - PaddlePaddle
+   - synonyms // only required in eda part,
 
 2. python augumentor.py --input /path/to/sentences.txt
 
