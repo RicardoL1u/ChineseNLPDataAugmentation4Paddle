@@ -1,4 +1,4 @@
-# ChineseNLPDataAugmentation
+# ChineseNLPDataAugmentation4Paddle
 
 Chinese NLP Data Augmentation, BERT Contextual Augmentation, Customized for PaddleNLP
 
