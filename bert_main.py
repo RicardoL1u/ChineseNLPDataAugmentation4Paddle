@@ -139,20 +139,13 @@ class BertAugmentor(object):
                 word_index.append(index_ + i)
             word_ids_arr.append(word_ids_)
             word_index_arr.append(word_index)
-        # print(word_ids_arr)
-        # print(word_index_arr)
         for word_ids, word_index in zip(word_ids_arr, word_index_arr):
-            result.append(self.gen_sen(word_ids, indexes=word_index))
-        #     out_arr.extend(arr_)
-        #     pass
-        # # 这个是所有生成的句子中,筛选出前 beam size 个。
-        # out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)
-        # out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_size]]
+            result.extend(self.gen_sen(word_ids, indexes=word_index))
+
         return result
 
     def insert_word2queries(self, queries:list, beam_size=10):
-        self.beam_size = beam_size
-        out_map = defaultdict(dict)
+        out_map = {}
         for query in queries:
             out_map[query] = self.word_insert(query)
         return out_map

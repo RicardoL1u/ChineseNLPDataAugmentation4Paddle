@@ -10,6 +10,7 @@ todo: 将各中增强方法在此汇合和使用，输入文件，输出为各�
 
 # here put the import lib
 import argparse
+import re
 # from email.policy import default
 import util
 # import eda_chinese as eda
@@ -42,7 +43,10 @@ class Augmentor(object):
         # 写出到文件
         with open(file_ + ".bert_insert", 'w', encoding='utf-8') as out:
             for query, v in insert_result.items():
-                out.write("{}\t{}\n".format(query, ';',v))
+                print(type(v))
+                for result in v:
+                    print((result))
+                    out.write("{}\t{}\n".format(query,str(result)))
 
 
     def augment(self, file_):
