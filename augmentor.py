@@ -13,7 +13,7 @@ import argparse
 import re
 # from email.policy import default
 import util
-# import eda_chinese as eda
+import eda_chinese as eda
 import bert_main as bert
 # import back_translate as bt
 
@@ -22,7 +22,8 @@ import bert_main as bert
 
 class Augmentor(object):
     def __init__(self, model_dir:str):
-        self.mask_model = bert.BertAugmentor(model_dir)
+        # self.mask_model = bert.BertAugmentor(model_dir)
+        pass
     
     def bert_augment(self, file_:str):
         """ 
@@ -48,9 +49,9 @@ class Augmentor(object):
 
     def augment(self, file_):
         # ead
-        # eda.augment(file_)/
+        eda.augment(file_)
         # bert
-        self.bert_augment(file_)
+        # self.bert_augment(file_)
         # back translate
         # bt.augment(file_)
         pass
