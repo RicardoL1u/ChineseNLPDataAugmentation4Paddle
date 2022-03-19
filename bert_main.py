@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding=utf-8
 '''
-@Time    :   2020/06/14 17:45:13
-@Author  :   zhiyang.zzy 
-@Contact :   zhiyangchou@gmail.com
+@Time    :   2022/03/19 23:45:13
+@Author  :   RicardoL1u
+@Contact :   ricardoliu@outlook.com
 @Desc    :   
 1. 随机插入mask,使用bert来生成 mask 的内容,来丰富句子
 2. 随机将某些词语mask,使用bert来生成 mask 的内容。
@@ -26,8 +26,6 @@ class BertAugmentor(object):
         self.bert_encoder = BertForMaskedLM.from_pretrained(pre_train_dir)
         self.tokenizer = BertTokenizer.from_pretrained(pre_train_dir)
         self.topk = 2
-        # token策略,由于是中文,使用了token分割,同时对于数字和英文使用char分割。
-        # self.tokenizer = tokenization.CharTokenizer(vocab_file=self.bert_vocab_file)
         self.mask_token = "[MASK]"
         self.mask_id = self.tokenizer.convert_tokens_to_ids([self.mask_token])[0]
         self.cls_token = "[CLS]"
