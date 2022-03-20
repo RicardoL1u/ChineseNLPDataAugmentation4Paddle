@@ -5,7 +5,7 @@
 @Author  :   RicardoLiu
 @Contact :   ricardoliu@outlook.com
 @Desc    :   
-todo: 将各中增强方法在此汇合和使用，输入文件，输出为各中方法增强后的结果。
+todo: 将各中增强方法在此汇合和使用,输入文件,输出为各中方法增强后的结果。
 '''
 
 import argparse
@@ -13,24 +13,28 @@ import util
 import eda_chinese as eda
 import bert_main as bert
 
+
 class Augmentor(object):
     def __init__(self, model_dir:str):
         self.mask_model = bert.BertAugmentor(model_dir)
         pass
     
-    def bert_augment(self, file_:str):
+    def bert_replace_augment(self, file_:str):
         """ 
-        file_: 输入文件，每行是一个query
+        file_: 输入文件,每行是一个query
         """
         queries = util.read_file(file_)
-        # 随机替换:通过随机mask掉词语，预测可能的值。
+        # 随机替换:通过随机mask掉词语,预测可能的值。
         replace_result = self.mask_model.replace_word2queries(queries)
         with open(file_ + ".bert_replace", 'w', encoding='utf-8') as out:
             for query, v in replace_result.items():
                 for result in v:
                     out.write("{}\t{}\n".format(query,str(result)))
 
-        # 随机插入:通过随机插入mask，预测可能的词语
+    def bert_insert_augment(self, file_:str):
+        ""
+        queries = util.read_file(file_)
+        # 随机插入:通过随机插入mask,预测可能的词语
         insert_result = self.mask_model.insert_word2queries(queries)
         print("Augmentor's result:", insert_result)
         # 写出到文件
@@ -43,8 +47,10 @@ class Augmentor(object):
     def augment(self, file_):
         # ead
         eda.augment(file_)
-        # bert
-        self.bert_augment(file_)
+        # bert replace
+        self.bert_replace_augment(file_)
+        # bert insert
+        self.bert_insert_augment(file_)
 
 
 if __name__ == "__main__":

@@ -6,14 +6,14 @@ from random import shuffle
 
 random.seed(2019)
 
-#停用词列表，默认使用哈工大停用词表
+#停用词列表,默认使用哈工大停用词表
 f = open('./data/stopwords/hit_stopwords.txt')
 stop_words = list()
 for stop_word in f.readlines():
     stop_words.append(stop_word[:-1])
 
 
-#考虑到与英文的不同，暂时搁置
+#考虑到与英文的不同,暂时搁置
 #文本清理
 '''
 import re
@@ -171,7 +171,7 @@ def eda(sentence, alpha_sr=0.1, alpha_ri=0.1, alpha_rs=0.1, p_rd=0.1, num_aug=9)
 
 def augment(file_):
     """
-    file_: 输入文件，每行是一个query
+    file_: 输入文件,每行是一个query
     """
     queries = util.read_file(file_)
     result = {}
@@ -185,4 +185,4 @@ def augment(file_):
     pass
 ##
 #测试用例
-#eda(sentence="我们就像蒲公英，我也祈祷着能和你飞去同一片土地")
+#eda(sentence="我们就像蒲公英,我也祈祷着能和你飞去同一片土地")

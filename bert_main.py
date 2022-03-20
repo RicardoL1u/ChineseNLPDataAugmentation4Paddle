@@ -7,8 +7,8 @@
 @Desc    :   
 1. 随机插入mask,使用bert来生成 mask 的内容,来丰富句子
 2. 随机将某些词语mask,使用bert来生成 mask 的内容。
-    - 使用贪心算法,每次最优。
-    - beam search方法,每次保留最优的前n个,最多num_beams个句子。(注意句子数据大于num_beams个时候,剔除概率最低的,防止内存溢出)。
+    - 使用贪心算法 topk, 每次最优。
+    - 最优是指 各自概率之乘积最大
 '''
 
 from paddlenlp.transformers import BertTokenizer,BertForMaskedLM
@@ -24,13 +24,6 @@ class BertAugmentor(object):
         self.bert_encoder = BertForMaskedLM.from_pretrained(pre_train_dir)
         self.tokenizer = BertTokenizer.from_pretrained(pre_train_dir)
         self.topk = 2
-        self.mask_token = "[MASK]"
-        self.mask_id = self.tokenizer.convert_tokens_to_ids([self.mask_token])[0]
-        self.cls_token = "[CLS]"
-        self.cls_id = self.tokenizer.convert_tokens_to_ids([self.cls_token])[0]
-        self.sep_token = "[SEP]"
-        self.sep_id = self.tokenizer.convert_tokens_to_ids([self.sep_token])[0]
-
     
 
     def gen_sen(self, word_ids:list, indexes:list):
@@ -64,7 +57,7 @@ class BertAugmentor(object):
                     pop_ptr = i
             seq = seq[np.where(seq != self.tokenizer.pad_token_id)]
             sequence = self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(seq,skip_special_tokens=True))
-            proposition = {"score": v, "insert_index":indexes,"token": p, "token_str": self.tokenizer.convert_ids_to_tokens(p), "sequence": sequence}
+            proposition = {"score": v, "indexes":indexes,"token": p, "token_str": self.tokenizer.convert_ids_to_tokens(p), "sequence": sequence}
             result.append(proposition)
             ptr[pop_ptr] += 1
         return result
@@ -90,7 +83,7 @@ class BertAugmentor(object):
             word_ids_ = word_ids.copy()
             word_index = []
             for i in range(insert_num):
-                word_ids_.insert(index_, self.mask_id)
+                word_ids_.insert(index_, self.tokenizer.mask_token_id)
                 word_index.append(index_ + i)
             word_ids_arr.append(word_ids_)
             word_index_arr.append(word_index)
@@ -100,7 +93,7 @@ class BertAugmentor(object):
         return result
 
     def word_replace(self,query):
-        """随机将某些词语mask，使用bert来生成 mask 的内容。"""
+        """随机将某些词语mask,使用bert来生成 mask 的内容。"""
         result = []
         seg_list = jieba.cut(query, cut_all=False)
         # 随机选择非停用词mask。
@@ -112,12 +105,12 @@ class BertAugmentor(object):
         query = '[CLS]' + query + '[SEP]'
         word_ids = self.tokenizer(query)["input_ids"]
         word_ids_arr, word_index_arr = [], []
-        # 依次mask词语，
+        # 依次mask词语,
         for index_, word_len in index_map.items():
             word_ids_ = word_ids.copy()
             word_index = []
             for i in range(word_len):
-                word_ids_[index_ + i] = self.mask_id
+                word_ids_[index_ + i] = self.tokenizer.mask_token_id
                 word_index.append(index_ + i)
             word_ids_arr.append(word_ids_)
             word_index_arr.append(word_index)

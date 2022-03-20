@@ -11,7 +11,7 @@ class TestMask(unittest.TestCase):
         self.model = BertForMaskedLM.from_pretrained('bert-base-chinese')
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
     def test_fill(self):
-        test_str = '在这篇文章中，我会努力去概述[MASK]当前用于文本数据增强的方法.'
+        test_str = '在这篇文章中,我会努力去概述[MASK]当前用于文本数据增强的方法.'
         model_inputs = self.tokenizer(test_str)
         input_ids = model_inputs["input_ids"]
         # print(type(model_inputs),model_inputs)
