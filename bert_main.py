@@ -57,7 +57,13 @@ class BertAugmentor(object):
                     pop_ptr = i
             seq = seq[np.where(seq != self.tokenizer.pad_token_id)]
             sequence = self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(seq,skip_special_tokens=True))
-            proposition = {"score": v, "indexes":indexes,"token": p, "token_str": self.tokenizer.convert_ids_to_tokens(p), "sequence": sequence}
+            proposition = {
+                "score": v, 
+                "indexes":(np.array(indexes)-1).tolist(), # -1 是为了消除CLS的影响
+                "token": p, 
+                "token_str": self.tokenizer.convert_ids_to_tokens(p), 
+                "sequence": sequence
+            }
             result.append(proposition)
             ptr[pop_ptr] += 1
         return result
