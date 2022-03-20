@@ -20,7 +20,7 @@ Chinese NLP Data Augmentation, BERT Contextual Augmentation, Customized for Padd
 
 2. utilize the ```BertForMaskedLM``` to predict which token the [MASK] should be
 
-3. choose the best top k prediction as the result
+3. choose the best top k prediction combination as results
 
 ### EDA Part
 
