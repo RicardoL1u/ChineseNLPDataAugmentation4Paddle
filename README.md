@@ -16,7 +16,7 @@ Chinese NLP Data Augmentation, BERT Contextual Augmentation, Customized for Padd
    replace: 时间往往[MASK]打败大多数人
    ```
 
-   > we adopt the jieba to avoid insert [MASK] to one word inside like "时[MASK]间往往能打败大多数人"
+   > we adopt the [jieba](https://github.com/fxsjy/jieba) a Chinese word segmentation module to avoid insert [MASK] to one word inside like "时[MASK]间往往能打败大多数人"
 
 2. utilize the ```BertForMaskedLM``` to predict which token the [MASK] should be
 
@@ -31,6 +31,7 @@ TBD
 1. environment require
    - PaddleNLP
    - PaddlePaddle
+   - jieba
    - synonyms // only required in eda part,
 
 2. python augumentor.py --input /path/to/sentences.txt
